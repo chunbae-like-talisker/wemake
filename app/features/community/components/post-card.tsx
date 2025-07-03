@@ -11,6 +11,7 @@ import {
   AvatarFallback,
   AvatarImage,
 } from "~/common/components/ui/avatar";
+import { DotIcon } from "lucide-react";
 
 interface PostCardProps {
   id: string;
@@ -42,7 +43,7 @@ export function PostCard({
             <div className="flex gap-2 text-sm leading-tight text-muted-foreground">
               <span>{author} on</span>
               <span>{category}</span>
-              <span>•</span>
+              <DotIcon className="size-4" />
               <span>{timeAgo}</span>
             </div>
           </div>

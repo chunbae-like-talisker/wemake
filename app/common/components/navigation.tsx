@@ -233,7 +233,7 @@ export default function Navigation({
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Avatar>
-                <AvatarImage src="https://pbs.twimg.com/profile_images/1935139532640555008/bt3E6H5M_400x400.jpg" />
+                <AvatarImage src="https://github.com/chunbae-like-talisker.png" />
                 <AvatarFallback>N</AvatarFallback>
               </Avatar>
             </DropdownMenuTrigger>

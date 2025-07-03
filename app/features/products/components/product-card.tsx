@@ -11,7 +11,7 @@ import { ChevronUpIcon, MessageCircleIcon, EyeIcon } from "lucide-react";
 import type { ReactNode } from "react";
 
 interface ProductCardProps {
-  to: string;
+  id: string;
   title: string;
   description: string;
   commentCount: number;
@@ -20,7 +20,7 @@ interface ProductCardProps {
 }
 
 export function ProductCard({
-  to,
+  id,
   title,
   description,
   commentCount,
@@ -28,7 +28,7 @@ export function ProductCard({
   upvoteCount,
 }: ProductCardProps) {
   return (
-    <Link to={to}>
+    <Link to={`/products/${id}`} className="block">
       <Card className="w-full flex flex-row bg-transparent hover:bg-card/50">
         <CardHeader className="w-full">
           <CardTitle>{title}</CardTitle>
