@@ -5,6 +5,13 @@ import { PostCard } from "~/features/community/components/post-card";
 import { IdeaCard } from "~/features/ideas/components/idea-card";
 import { JobCard } from "~/features/jobs/components/job-card";
 import { TeamCard } from "~/features/teams/components/team-card";
+import { getProductsByDateRange } from "~/features/products/queries";
+import { DateTime } from "luxon";
+import type { Route } from "./+types/home-page";
+import { getPosts } from "~/features/community/queries";
+import { getGptIdeas } from "~/features/ideas/queries";
+import { getJobs } from "~/features/jobs/queries";
+import { getTeams } from "~/features/teams/queries";
 
 export const meta: MetaFunction = () => {
   return [
@@ -13,7 +20,25 @@ export const meta: MetaFunction = () => {
   ];
 };
 
-export default function HomePage() {
+export const loader = async () => {
+  const [products, posts, ideas, jobs, teams] = await Promise.all([
+    getProductsByDateRange({
+      startDate: DateTime.now().startOf("day"),
+      endDate: DateTime.now().endOf("day"),
+      limit: 7,
+    }),
+    getPosts({
+      limit: 7,
+      sorting: "newest",
+    }),
+    getGptIdeas({ limit: 7 }),
+    getJobs({ limit: 11 }),
+    getTeams({ limit: 7 }),
+  ]);
+  return { products, posts, ideas, jobs, teams };
+};
+
+export default function HomePage({ loaderData }: Route.ComponentProps) {
   return (
     <div className="px-20 space-y-40">
       <div className="grid grid-cols-3 gap-4">
@@ -28,14 +53,15 @@ export default function HomePage() {
             <Link to="/products/leaderboards">Explore all products &rarr;</Link>
           </Button>
         </div>
-        {Array.from({ length: 10 }).map((_, index) => (
+        {loaderData.products.map((product) => (
           <ProductCard
-            id={`productId-${index + 1}`}
-            title={`Product Name ${index + 1}`}
-            description={`Product Description ${index + 1}`}
-            commentCount={123 + index}
-            viewCount={123 + index * 2}
-            upvoteCount={120 + index * 3}
+            key={product.product_id}
+            id={product.product_id}
+            name={product.name}
+            description={product.tagline}
+            reviewsCount={product.reviews}
+            viewsCount={product.views}
+            votesCount={product.upvotes}
           />
         ))}
       </div>
@@ -51,14 +77,17 @@ export default function HomePage() {
             <Link to="/community">Explore all discussions &rarr;</Link>
           </Button>
         </div>
-        {Array.from({ length: 10 }).map((_, index) => (
+        {loaderData.posts.map((post) => (
           <PostCard
-            id={`postId-${index + 1}`}
-            title="What is the best productivity tool?"
-            avatarSrc="https://github.com/apple.png"
-            author="Nico"
-            category="productivity"
-            timeAgo="12 hours ago"
+            key={post.post_id}
+            id={post.post_id}
+            title={post.title}
+            author={post.author}
+            authorAvatarUrl={post.author_avatar}
+            category={post.topic}
+            postedAt={post.created_at}
+            votesCount={post.upvotes}
+            expanded
           />
         ))}
       </div>
@@ -74,15 +103,15 @@ export default function HomePage() {
             <Link to="/ideas">Explore all ideas &rarr;</Link>
           </Button>
         </div>
-        {Array.from({ length: 5 }).map((_, index) => (
+        {loaderData.ideas.map((idea) => (
           <IdeaCard
-            key={index}
-            id={`ideaId-${index + 1}`}
-            title="A startup that creates an AI-powered generated personal trainer, delivering customized fitness recommendations and tracking of progress using a mobile app to track workouts and progress as well as a website to manage the business."
-            viewCount={123}
-            timeAgo="12 hours ago"
-            likeCount={12}
-            claimed={index % 2 === 0}
+            key={idea.gpt_idea_id}
+            id={idea.gpt_idea_id}
+            title={idea.idea}
+            viewsCount={idea.views}
+            postedAt={idea.created_at}
+            likesCount={idea.likes}
+            claimed={idea.is_claimed}
           />
         ))}
       </div>
@@ -98,17 +127,18 @@ export default function HomePage() {
             <Link to="/jobs">Explore all jobs &rarr;</Link>
           </Button>
         </div>
-        {Array.from({ length: 11 }).map((_, index) => (
+        {loaderData.jobs.map((job) => (
           <JobCard
-            id={`jobId-${index + 1}`}
-            companyName="Tesla Motors"
-            companyLogo="https://github.com/facebook.png"
-            jobTitle="Software Engineer"
-            description="We are looking for a software engineer with 3 years of experience."
-            timeAgo="12 hours ago"
-            salary="$100,000 - $120,000"
-            location="San Francisco, CA"
-            badges={["Full-time", "Remote"]}
+            key={job.job_id}
+            id={job.job_id}
+            company={job.company_name}
+            companyLogoUrl={job.company_logo}
+            companyHq={job.company_location}
+            title={job.position}
+            postedAt={job.created_at}
+            type={job.job_type}
+            positionLocation={job.location}
+            salary={job.salary_range}
           />
         ))}
       </div>
@@ -124,17 +154,14 @@ export default function HomePage() {
             <Link to="/teams">Explore all teams &rarr;</Link>
           </Button>
         </div>
-        {Array.from({ length: 7 }).map((_, index) => (
+        {loaderData.teams.map((team) => (
           <TeamCard
-            id={`teamId-${index + 1}`}
-            username="chunbae"
-            userAvatar="https://github.com/chunbae-like-talisker.png"
-            projectDescription="a new social media platform"
-            requiredRoles={[
-              "React Developer",
-              "Backend Developer",
-              "Product Manager",
-            ]}
+            key={team.team_id}
+            id={team.team_id}
+            leaderUsername={team.team_leader.username}
+            leaderAvatarUrl={team.team_leader.avatar}
+            positions={team.roles.split(",")}
+            projectDescription={team.product_description}
           />
         ))}
       </div>

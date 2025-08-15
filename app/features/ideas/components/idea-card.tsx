@@ -3,29 +3,29 @@ import { Link } from "react-router";
 import {
   Card,
   CardContent,
-  CardDescription,
   CardFooter,
   CardHeader,
   CardTitle,
 } from "~/common/components/ui/card";
 import { Button } from "~/common/components/ui/button";
 import { cn } from "~/lib/utils";
+import { DateTime } from "luxon";
 
 interface IdeaCardProps {
-  id: string;
+  id: number;
   title: string;
-  viewCount: number;
-  timeAgo: string;
-  likeCount: number;
+  viewsCount: number;
+  postedAt: string;
+  likesCount: number;
   claimed: boolean;
 }
 
 export function IdeaCard({
   id,
   title,
-  viewCount,
-  timeAgo,
-  likeCount,
+  viewsCount,
+  postedAt,
+  likesCount,
   claimed,
 }: IdeaCardProps) {
   return (
@@ -46,15 +46,15 @@ export function IdeaCard({
       <CardContent className="flex items-center text-sm">
         <span className="flex items-center gap-2">
           <EyeIcon className="size-4" />
-          <span>{viewCount}</span>
+          <span>{viewsCount}</span>
         </span>
         <DotIcon className="size-4" />
-        <span>{timeAgo}</span>
+        <span>{DateTime.fromISO(postedAt).toRelative()}</span>
       </CardContent>
       <CardFooter className="flex justify-end gap-2">
         <Button variant="outline">
           <HeartIcon className="size-4" />
-          <span>{likeCount}</span>
+          <span>{likesCount}</span>
         </Button>
         {!claimed ? (
           <Button asChild>

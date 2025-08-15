@@ -16,37 +16,37 @@ import {
 } from "~/common/components/ui/avatar";
 
 interface TeamCardProps {
-  id: string;
-  username: string;
-  userAvatar: string;
+  id: number;
+  leaderUsername: string;
+  leaderAvatarUrl: string | null;
+  positions: string[];
   projectDescription: string;
-  requiredRoles: string[];
 }
 
 export function TeamCard({
   id,
-  username,
-  userAvatar,
+  leaderUsername,
+  leaderAvatarUrl,
   projectDescription,
-  requiredRoles,
+  positions,
 }: TeamCardProps) {
   return (
-    <Link to={`/teams/${id}`}>
-      <Card className="bg-transparent hover:bg-card/50 transition-colors">
+    <Link to={`/teams/${id}`} className="block">
+      <Card className="bg-transparent hover:bg-card/50 flex flex-col justify-between transition-colors h-full">
         <CardHeader className="flex flex-row items-center">
           <CardTitle className="text-base leading-loose">
             <Badge
               variant="secondary"
               className="inline-flex shadow-sm items-center text-base"
             >
-              <span>@{username}</span>
+              <span>@{leaderUsername}</span>
               <Avatar className="size-5">
-                <AvatarImage src={userAvatar} />
-                <AvatarFallback>N</AvatarFallback>
+                <AvatarFallback>{leaderUsername[0]}</AvatarFallback>
+                {leaderAvatarUrl ? <AvatarImage src={leaderAvatarUrl} /> : null}
               </Avatar>
             </Badge>
             <span> is looking for </span>
-            {requiredRoles.map((role, index) => (
+            {positions.map((role, index) => (
               <Badge key={index} className="text-base">
                 {role}
               </Badge>
