@@ -3,10 +3,19 @@ import type { Route } from "./+types/profile-page";
 import client from "~/supa-client";
 
 export const loader = async ({ params }: Route.LoaderArgs) => {
-  await client.rpc("track_event", {
-    event_type: "profile_view",
-    event_data: { username: params.username }, // TODO: username -> user_id
-  });
+  const { error, data } = await client
+    .from("profiles")
+    .select("profile_id")
+    .eq("username", params.username)
+    .limit(1)
+    .single();
+
+  if (data) {
+    await client.rpc("track_event", {
+      event_type: "profile_view",
+      event_data: { profile_id: data.profile_id }, // TODO: username -> user_id
+    });
+  }
   return null;
 };
 
