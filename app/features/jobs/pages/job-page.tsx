@@ -5,6 +5,7 @@ import { Button } from "~/common/components/ui/button";
 import z from "zod";
 import { getJobById } from "../queries";
 import { DateTime } from "luxon";
+import { makeSSRClient } from "~/supa-client";
 
 const paramsSchema = z.object({
   jobId: z.coerce.number(),
@@ -14,13 +15,14 @@ export const meta: Route.MetaFunction = () => {
   return [{ title: "Job Details | wemake" }];
 };
 
-export const loader = async ({ params }: Route.LoaderArgs) => {
+export const loader = async ({ request, params }: Route.LoaderArgs) => {
   const { success, data: parsedData } = paramsSchema.safeParse(params);
   if (!success) {
     throw new Error("Invalid parameters");
   }
 
-  const job = await getJobById(parsedData.jobId);
+  const { client } = makeSSRClient(request);
+  const job = await getJobById(client, { jobId: parsedData.jobId });
   return { job };
 };
 

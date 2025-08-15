@@ -6,7 +6,7 @@ const searchParamsSchema = z.object({
   page: z.coerce.number().min(1).optional().default(1),
 });
 
-export const loader = async ({ params, request }: Route.LoaderArgs) => {
+export const loader = async ({ request, params }: Route.LoaderArgs) => {
   const url = new URL(request.url);
   const { success, data: parsedPage } = searchParamsSchema.safeParse(
     Object.fromEntries(url.searchParams)

@@ -5,6 +5,7 @@ import { cn } from "~/lib/utils";
 import type { Route } from "./+types/product-overview-layout";
 import { getProductById } from "../queries";
 import z from "zod";
+import { makeSSRClient } from "~/supa-client";
 
 const paramsSchema = z.object({
   productId: z.coerce.number(),
@@ -17,13 +18,16 @@ export function meta({ data }: Route.MetaArgs) {
   ];
 }
 
-export const loader = async ({ params }: Route.LoaderArgs) => {
+export const loader = async ({ request, params }: Route.LoaderArgs) => {
   const { success, data: parsedData } = paramsSchema.safeParse(params);
   if (!success) {
     throw new Error("Invalid parameters");
   }
 
-  const product = await getProductById(parsedData.productId);
+  const { client } = makeSSRClient(request);
+  const product = await getProductById(client, {
+    productId: parsedData.productId,
+  });
   return { product };
 };
 

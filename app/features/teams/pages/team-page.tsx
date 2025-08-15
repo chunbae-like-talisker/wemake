@@ -17,6 +17,7 @@ import {
 } from "~/common/components/ui/card";
 import z from "zod";
 import { getTeamById } from "../queries";
+import { makeSSRClient } from "~/supa-client";
 
 const paramsSchema = z.object({
   teamId: z.coerce.number(),
@@ -26,13 +27,14 @@ export const meta: Route.MetaFunction = ({ params }) => {
   return [{ title: `${params.teamId} | wemake` }];
 };
 
-export const loader = async ({ params }: Route.LoaderArgs) => {
+export const loader = async ({ request, params }: Route.LoaderArgs) => {
   const { success, data: parsedData } = paramsSchema.safeParse(params);
   if (!success) {
     throw new Error("Invalid parameters");
   }
 
-  const team = await getTeamById(parsedData.teamId);
+  const { client } = makeSSRClient(request);
+  const team = await getTeamById(client, { teamId: parsedData.teamId });
   return { team };
 };
 

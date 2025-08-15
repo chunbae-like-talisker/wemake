@@ -1,8 +1,9 @@
 import { useOutletContext } from "react-router";
 import type { Route } from "./+types/profile-page";
-import client from "~/supa-client";
+import { makeSSRClient } from "~/supa-client";
 
-export const loader = async ({ params }: Route.LoaderArgs) => {
+export const loader = async ({ request, params }: Route.LoaderArgs) => {
+  const { client } = makeSSRClient(request);
   const { error, data } = await client
     .from("profiles")
     .select("profile_id")

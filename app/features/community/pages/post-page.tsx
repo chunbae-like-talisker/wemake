@@ -20,6 +20,7 @@ import Reply from "../components/reply";
 import z from "zod";
 import { getPostById, getReplies } from "../queries";
 import { DateTime } from "luxon";
+import { makeSSRClient } from "~/supa-client";
 
 const paramsSchema = z.object({
   postId: z.coerce.number(),
@@ -29,14 +30,15 @@ export const meta: Route.MetaFunction = ({ params }) => {
   return [{ title: `${params.postId} | wemake` }];
 };
 
-export const loader = async ({ params }: Route.LoaderArgs) => {
+export const loader = async ({ request, params }: Route.LoaderArgs) => {
   const { success, data: parsedData } = paramsSchema.safeParse(params);
   if (!success) {
     throw new Error("Invalid parameters");
   }
 
-  const post = await getPostById(parsedData.postId);
-  const replies = await getReplies(parsedData.postId);
+  const { client } = makeSSRClient(request);
+  const post = await getPostById(client, { postId: parsedData.postId });
+  const replies = await getReplies(client, { postId: parsedData.postId });
   return { post, replies };
 };
 

@@ -4,18 +4,26 @@ import { Button } from "~/common/components/ui/button";
 import type { Route } from "./+types/idea-page";
 import { getGptIdea } from "../queries";
 import { DateTime } from "luxon";
+import { makeSSRClient } from "~/supa-client";
+import z from "zod";
 
-export const meta = ({
-  data: {
-    idea: { gpt_idea_id, idea },
-  },
-}: Route.MetaArgs) => [
-  { title: `Idea #${gpt_idea_id}: ${idea} | wemake` },
+const paramsSchema = z.object({
+  ideaId: z.coerce.number(),
+});
+
+export const meta = ({ data }: Route.MetaArgs) => [
+  { title: `Idea #${data?.idea.gpt_idea_id}: ${data?.idea.idea} | wemake` },
   { name: "description", content: "Find ideas for your next project" },
 ];
 
-export const loader = async ({ params }: Route.LoaderArgs) => {
-  const idea = await getGptIdea(params.ideaId);
+export const loader = async ({ request, params }: Route.LoaderArgs) => {
+  const { success, data: parsedData } = paramsSchema.safeParse(params);
+  if (!success) {
+    throw new Error("Invalid parameters");
+  }
+
+  const { client } = makeSSRClient(request);
+  const idea = await getGptIdea(client, { ideaId: parsedData.ideaId });
   return { idea };
 };
 

@@ -1,13 +1,15 @@
 import { PostCard } from "~/features/community/components/post-card";
 import type { Route } from "./+types/profile-posts-page";
 import { getUserPosts } from "../queries";
+import { makeSSRClient } from "~/supa-client";
 
 export function meta({}: Route.MetaFunction) {
   return [{ title: "Posts | wemake" }];
 }
 
-export const loader = async ({ params }: Route.LoaderArgs) => {
-  const posts = await getUserPosts(params.username);
+export const loader = async ({ request, params }: Route.LoaderArgs) => {
+  const { client } = makeSSRClient(request);
+  const posts = await getUserPosts(client, { username: params.username });
   return { posts };
 };
 

@@ -6,6 +6,7 @@ import { useOutletContext } from "react-router";
 import type { Route } from "./+types/product-reviews-page";
 import z from "zod";
 import { getReviews } from "../queries";
+import { makeSSRClient } from "~/supa-client";
 
 const paramsSchema = z.object({
   productId: z.coerce.number(),
@@ -18,13 +19,14 @@ export function meta() {
   ];
 }
 
-export const loader = async ({ params }: Route.LoaderArgs) => {
+export const loader = async ({ request, params }: Route.LoaderArgs) => {
   const { success, data: parsedData } = paramsSchema.safeParse(params);
   if (!success) {
     throw new Error("Invalid parameters");
   }
 
-  const reviews = await getReviews(parsedData.productId);
+  const { client } = makeSSRClient(request);
+  const reviews = await getReviews(client, { productId: parsedData.productId });
   return { reviews };
 };
 
